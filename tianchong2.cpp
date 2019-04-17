@@ -25,11 +25,176 @@ struct point
 void PolyScan()
 {
 	/******计算最高点的y坐标(扫描到此结束)****************************************/
-	int MaxY = 0;
+	int MaxY = 0, MinY = 1024;
 	int i;
 	for (i = 0; i < POINTNUM; i++)
+	{
 		if (polypoint[i].y > MaxY)
 			MaxY = polypoint[i].y;
+		if (polypoint[i].y < MinY)
+			MinY = polypoint[i].y;
+	}
+	//printf("%d,%d", MaxY, MinY);
+	/*******初始化AET表***********************************************************/
+	AET *pAET = new AET;  /*在堆上创建一个匿名的AET变量，用指针pAET标识使用*/
+	pAET->next = NULL;
+
+	/******初始化NET表************************************************************/
+	NET *pNET[1024];
+	for (i = 0; i <= MaxY; i++)
+	{
+		pNET[i] = new NET;  //pNET是头节点
+		pNET[i]->next = NULL;
+	}
+	//glClear(GL_COLOR_BUFFER_BIT);        //赋值的窗口显示.
+	glColor3f(1.0, 0.0, 0.0);   //设置直线的颜色红色
+	//glLineWidth(1);
+	//glBegin(GL_LINE_LOOP);
+	/******扫描并建立NET表（第一次出现的边）*********************************************************/
+	for (i = 0; i <= MaxY; i++)               //每条扫描线都要遍历一遍多边形所有的点
+	{
+		for (int j = 0; j < POINTNUM; j++)
+			if (polypoint[j].y == i)
+			{
+				//一个点跟前面的一个点形成一条线段，跟后面的点也形成线段。多边形点是有顺序的
+				if (polypoint[(j - 1 + POINTNUM) % POINTNUM].y > polypoint[j].y)
+				{
+					NET *p = new NET;
+					p->x = polypoint[j].x;
+					p->ymax = polypoint[(j - 1 + POINTNUM) % POINTNUM].y;
+					p->dx = Width *((polypoint[(j - 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j - 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->next = pNET[i]->next; //p->next=NULL;
+					pNET[i]->next = p;  //扫描线i的下一个指向p
+				}
+				if (polypoint[(j + 1 + POINTNUM) % POINTNUM].y > polypoint[j].y)
+				{
+					NET *p = new NET;
+					p->x = polypoint[j].x;
+					p->ymax = polypoint[(j + 1 + POINTNUM) % POINTNUM].y;
+					p->dx = Width *((polypoint[(j + 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j + 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->next = pNET[i]->next;
+					pNET[i]->next = p;
+				}
+			}
+	}
+	/******建立并更新活性边表AET*****************************************************/
+	for (i = 0; i <= MaxY; i+= Width)
+	{
+		//计算新的交点x,更新AET
+		NET *p = pAET->next; // NET *p = new NET;  p = pAET->next; 
+		//if (pAET->next)printf("%d,i=%d\n", pAET->next, i); else printf("NULL,i=%d\n", i);
+		while (p)
+		{
+			p->x = p->x + p->dx;
+			p = p->next;
+		}
+		//更新后新AET先排序*************************************************************/
+		//断表排序,不再开辟空间
+		AET *tq = pAET;
+		p = pAET->next;
+		tq->next = NULL;
+		while (p)
+		{
+			while (tq->next && p->x >= tq->next->x)
+				tq = tq->next;
+			NET *s = p->next;
+			p->next = tq->next;
+			tq->next = p;
+			p = s;
+			tq = pAET;
+		}
+		//(改进算法)先从AET表中删除ymax==i的结点****************************************/
+		AET *q = pAET;
+		p = q->next;
+		while (p)
+		{
+			if (p->ymax == i)
+			{
+				q->next = p->next;
+				delete p;
+				p = q->next;
+			}
+			else
+			{
+				q = q->next;
+				p = q->next;
+			}
+		}
+		//将NET中的新点加入AET,并用插入法按X值递增排序**********************************/
+		p = pNET[i]->next;
+		q = pAET;
+		while (p)
+		{
+			while (q->next && p->x >= q->next->x)
+				q = q->next;
+			NET *s = p->next;
+			p->next = q->next;
+			q->next = p;
+			p = s;
+			q = pAET;
+		}
+		/******配对填充颜色***************************************************************/
+
+		p = pAET->next;
+		while (p && p->next)
+		{
+			if (i == MinY) //当Y坐标为最低点，设置为基线
+			{
+				float j = p->x; //printf("j = %f", j);
+				//glVertex2i(static_cast<int>(j), i-5); glVertex2i(static_cast<int>(j), i+5);
+				float h = p->next->x; //printf("h = %f", h);
+				//glVertex2i(static_cast<int>(h), i-5); glVertex2i(static_cast<int>(h), i+5);
+				glPointSize(3);
+				glBegin(GL_POINTS);
+				glVertex2i(static_cast<int>(j), i);
+				glEnd();
+			}
+			if ((i / 10) % 2 == 0&& i != MinY) //当Y坐标为偶数，X坐标向左移（右边的X减少）
+			{
+				float j = p->x;
+				//glVertex2i(static_cast<int>(j), i-5); glVertex2i(static_cast<int>(j), i+5);
+				float h = p->next->x-10;//这里平移
+				//glVertex2i(static_cast<int>(h), i-5); glVertex2i(static_cast<int>(h), i+5);
+				glBegin(GL_LINES);
+				glVertex2i(static_cast<int>(j), i); glVertex2i(static_cast<int>(h), i);
+				glVertex2i(static_cast<int>(j), i - 2); glVertex2i(static_cast<int>(h), i - 2);
+				glEnd();
+			}
+			if ((i / 10) % 2 == 1 && i != MinY)//当Y坐标为奇数，X坐标向右移（左边的X减少）
+			{
+				float j = p->x+10;//这里平移
+				//glVertex2i(static_cast<int>(j), i-5); glVertex2i(static_cast<int>(j), i+5);
+				float h = p->next->x;//这里平移
+				//glVertex2i(static_cast<int>(h), i-5); glVertex2i(static_cast<int>(h), i+5);
+				glBegin(GL_LINES);
+				glVertex2i(static_cast<int>(j), i); glVertex2i(static_cast<int>(h), i);
+				glVertex2i(static_cast<int>(j), i - 2); glVertex2i(static_cast<int>(h), i - 2);
+				glEnd();
+			}
+			p = p->next;//考虑端点情况
+
+		}
+		
+	}
+
+
+	//glEnd();
+	//glFlush();
+
+}
+
+void PolyScan1()
+{
+	/******计算最高点和最低点的y坐标(扫描到此结束)****************************************/
+	int MaxY = 0, MinY = 1024;
+	int i;
+	for (i = 0; i < POINTNUM; i++)
+	{
+		if (polypoint[i].y > MaxY)
+			MaxY = polypoint[i].y;
+		if (polypoint[i].y < MinY)
+			MinY = polypoint[i].y;
+	}
 
 	/*******初始化AET表***********************************************************/
 	AET *pAET = new AET;
@@ -43,8 +208,8 @@ void PolyScan()
 		pNET[i]->next = NULL;
 	}
 	//glClear(GL_COLOR_BUFFER_BIT);        //赋值的窗口显示.
-	glColor3f(1.0, 0.0, 0.0);   //设置直线的颜色红色
-	glLineWidth(3);
+	glColor3f(1.0, 0.0, 0.0);             //设置直线的颜色红色
+	glLineWidth(1);
 	glBegin(GL_LINES);
 	/******扫描并建立NET表*********************************************************/
 	for (i = 0; i <= MaxY; i++)
@@ -58,7 +223,7 @@ void PolyScan()
 					NET *p = new NET;
 					p->x = polypoint[j].x;
 					p->ymax = polypoint[(j - 1 + POINTNUM) % POINTNUM].y;
-					p->dx = 10*((polypoint[(j - 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j - 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->dx = Width * ((polypoint[(j - 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j - 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
 					p->next = pNET[i]->next;
 					pNET[i]->next = p;
 				}
@@ -67,14 +232,14 @@ void PolyScan()
 					NET *p = new NET;
 					p->x = polypoint[j].x;
 					p->ymax = polypoint[(j + 1 + POINTNUM) % POINTNUM].y;
-					p->dx = 10*((polypoint[(j + 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j + 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->dx = Width * ((polypoint[(j + 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j + 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
 					p->next = pNET[i]->next;
 					pNET[i]->next = p;
 				}
 			}
 	}
 	/******建立并更新活性边表AET*****************************************************/
-	for (i = 0; i <= MaxY; i+= Width)
+	for (i = 0; i <= MaxY; i += Width)
 	{
 		//计算新的交点x,更新AET
 		NET *p = pAET->next;
@@ -133,139 +298,29 @@ void PolyScan()
 		p = pAET->next;
 		while (p && p->next)
 		{
-			float j = p->x;
-		    glVertex2i(static_cast<int>(j), i);
-			float h = p->next->x;
-			glVertex2i(static_cast<int>(h), i);
-
+			if(i == MinY)
+			{
+				float j = p->x;
+			   glVertex2i(static_cast<int>(j), i);
+			   
+			}
+			
+			if ((i / 10) % 2 == 0&& i!= MinY ) //当Y坐标为偶数，X坐标向左移（右边的X减少）
+			{
+				float j = p->x;
+				//glVertex2i(static_cast<int>(j), i-5); glVertex2i(static_cast<int>(j), i+5);
+				float h = p->next->x - 10;//这里平移
+				//glVertex2i(static_cast<int>(h), i-5); glVertex2i(static_cast<int>(h), i+5);
+				//glBegin(GL_LINES);
+				glVertex2i(static_cast<int>(j), i - 2);
+				glVertex2i(static_cast<int>(j), i); 
+				 
+				//glEnd();
+			}
+			
 			p = p->next;//考虑端点情况
 
 		}
-		
-	}
-
-
-	glEnd();
-	//glFlush();
-
-}
-
-void PolyScan1()
-{
-	/******计算最高点的y坐标(扫描到此结束)****************************************/
-	int MaxY = 0;
-	int i;
-	for (i = 0; i < POINTNUM; i++)
-		if (polypoint[i].y > MaxY)
-			MaxY = polypoint[i].y;
-
-	/*******初始化AET表***********************************************************/
-	AET *pAET = new AET;
-	pAET->next = NULL;
-
-	/******初始化NET表************************************************************/
-	NET *pNET[1024];
-	for (i = 0; i <= MaxY; i++)
-	{
-		pNET[i] = new NET;
-		pNET[i]->next = NULL;
-	}
-	//glClear(GL_COLOR_BUFFER_BIT);        //赋值的窗口显示.
-	glColor3f(1.0, 0.0, 0.0);             //设置直线的颜色红色
-	glLineWidth(3);
-	glBegin(GL_LINES);
-	/******扫描并建立NET表*********************************************************/
-	for (i = 0; i <= MaxY; i++)
-	{
-		for (int j = 0; j < POINTNUM; j++)
-			if (polypoint[j].y == i)
-			{
-				//一个点跟前面的一个点形成一条线段，跟后面的点也形成线段
-				if (polypoint[(j - 1 + POINTNUM) % POINTNUM].y > polypoint[j].y)
-				{
-					NET *p = new NET;
-					p->x = polypoint[j].x;
-					p->ymax = polypoint[(j - 1 + POINTNUM) % POINTNUM].y;
-					p->dx = 10 * ((polypoint[(j - 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j - 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
-					p->next = pNET[i]->next;
-					pNET[i]->next = p;
-				}
-				if (polypoint[(j + 1 + POINTNUM) % POINTNUM].y > polypoint[j].y)
-				{
-					NET *p = new NET;
-					p->x = polypoint[j].x;
-					p->ymax = polypoint[(j + 1 + POINTNUM) % POINTNUM].y;
-					p->dx = 10 * ((polypoint[(j + 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j + 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
-					p->next = pNET[i]->next;
-					pNET[i]->next = p;
-				}
-			}
-	}
-	/******建立并更新活性边表AET*****************************************************/
-	for (i = 0; i <= MaxY; i += Width)
-	{
-		//计算新的交点x,更新AET
-		NET *p = pAET->next;
-		while (p)
-		{
-			p->x = p->x + p->dx;
-			p = p->next;
-		}
-		//更新后新AET先排序*************************************************************/
-		//断表排序,不再开辟空间
-		AET *tq = pAET;
-		p = pAET->next;
-		tq->next = NULL;
-		while (p)
-		{
-			while (tq->next && p->x >= tq->next->x)
-				tq = tq->next;
-			NET *s = p->next;
-			p->next = tq->next;
-			tq->next = p;
-			p = s;
-			tq = pAET;
-		}
-		//(改进算法)先从AET表中删除ymax==i的结点****************************************/
-		AET *q = pAET;
-		p = q->next;
-		while (p)
-		{
-			if (p->ymax == i)
-			{
-				q->next = p->next;
-				delete p;
-				p = q->next;
-			}
-			else
-			{
-				q = q->next;
-				p = q->next;
-			}
-		}
-		//将NET中的新点加入AET,并用插入法按X值递增排序**********************************/
-		p = pNET[i]->next;
-		q = pAET;
-		while (p)
-		{
-			while (q->next && p->x >= q->next->x)
-				q = q->next;
-			NET *s = p->next;
-			p->next = q->next;
-			q->next = p;
-			p = s;
-			q = pAET;
-		}
-		/******配对填充颜色***************************************************************/
-
-		p = pAET->next;
-		if (p&&p->next)
-		{
-			float h = p->x;
-			glVertex2i(static_cast<int>(h), i);
-		}
-		else
-			continue;
 	 
 	 //glFlush();
 	}
@@ -274,19 +329,16 @@ void PolyScan1()
 
 void PolyScan2()
 {
-	/******计算最高点的y坐标(扫描到此结束)****************************************/
-	int MaxY = 0;
+	/******计算最高点和最低点的y坐标(扫描到此结束)****************************************/
+	int MaxY = 0, MinY = 1024;
 	int i;
 	for (i = 0; i < POINTNUM; i++)
+	{
 		if (polypoint[i].y > MaxY)
 			MaxY = polypoint[i].y;
-
-	/******计算最低点的x坐标(扫描到此结束)****************************************/
-	int MinY = 500;
-	int e;
-	for (e = 0; e < POINTNUM; e++)
-		if (polypoint[e].y< MinY)
-			MinY = polypoint[e].y;
+		if (polypoint[i].y < MinY)
+			MinY = polypoint[i].y;
+	}
 
 	/*******初始化AET表***********************************************************/
 	AET *pAET = new AET;
@@ -301,7 +353,7 @@ void PolyScan2()
 	}
 	//glClear(GL_COLOR_BUFFER_BIT);        //赋值的窗口显示.
 	glColor3f(1.0, 0.0, 0.0);             //设置直线的颜色红色
-	glLineWidth(3);
+	glLineWidth(1);
 	glBegin(GL_LINES);
 	/******扫描并建立NET表*********************************************************/
 	for (i = 0; i <= MaxY; i++)
@@ -315,7 +367,7 @@ void PolyScan2()
 					NET *p = new NET;
 					p->x = polypoint[j].x;
 					p->ymax = polypoint[(j - 1 + POINTNUM) % POINTNUM].y;
-					p->dx = 10 * ((polypoint[(j - 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j - 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->dx = Width * ((polypoint[(j - 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j - 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
 					p->next = pNET[i]->next;
 					pNET[i]->next = p;
 				}
@@ -324,7 +376,7 @@ void PolyScan2()
 					NET *p = new NET;
 					p->x = polypoint[j].x;
 					p->ymax = polypoint[(j + 1 + POINTNUM) % POINTNUM].y;
-					p->dx = 10 * ((polypoint[(j + 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j + 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->dx = Width * ((polypoint[(j + 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j + 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
 					p->next = pNET[i]->next;
 					pNET[i]->next = p;
 				}
@@ -388,7 +440,7 @@ void PolyScan2()
 		/******配对填充颜色***************************************************************/
 
 		p = pAET->next;
-		
+		/*
 	    if (p&&p->next&&i!= MinY)
 		{
 			
@@ -397,12 +449,341 @@ void PolyScan2()
 		}
 		else
 			continue;
+        */
+		while (p && p->next)
+		{
+			if (i == MinY)
+			{
+				float j = p->x;
+				glVertex2i(static_cast<int>(j), i);
 
-	
+			}
+
+			if ((i / 10) % 2 == 1 && i != MinY) //当Y坐标为奇数，X坐标向右移（左边的X增加）
+			{
+				float j = p->x;
+				//glVertex2i(static_cast<int>(j), i-5); glVertex2i(static_cast<int>(j), i+5);
+				float h = p->next->x;//这里平移
+				//glVertex2i(static_cast<int>(h), i-5); glVertex2i(static_cast<int>(h), i+5);
+				//glBegin(GL_LINES);
+				glVertex2i(static_cast<int>(h), i - 2);
+				glVertex2i(static_cast<int>(h), i);
+
+				//glEnd();
+			}
+
+			p = p->next;//考虑端点情况
+
+		}
+
+
+
 	}
 	glEnd();
 }
 
+
+void PolyScan3()
+{
+	/******计算最高点和最低点的y坐标(扫描到此结束)****************************************/
+	int MaxY = 0, MinY = 1024;
+	int i;
+	for (i = 0; i < POINTNUM; i++)
+	{
+		if (polypoint[i].y > MaxY)
+			MaxY = polypoint[i].y;
+		if (polypoint[i].y < MinY)
+			MinY = polypoint[i].y;
+	}
+
+	/*******初始化AET表***********************************************************/
+	AET *pAET = new AET;
+	pAET->next = NULL;
+
+	/******初始化NET表************************************************************/
+	NET *pNET[1024];
+	for (i = 0; i <= MaxY; i++)
+	{
+		pNET[i] = new NET;
+		pNET[i]->next = NULL;
+	}
+	//glClear(GL_COLOR_BUFFER_BIT);        //赋值的窗口显示.
+	glColor3f(1.0, 0.0, 0.0);             //设置直线的颜色红色
+	glLineWidth(1);
+	glBegin(GL_LINES);
+	/******扫描并建立NET表*********************************************************/
+	for (i = 0; i <= MaxY; i++)
+	{
+		for (int j = 0; j < POINTNUM; j++)
+			if (polypoint[j].y == i)
+			{
+				//一个点跟前面的一个点形成一条线段，跟后面的点也形成线段
+				if (polypoint[(j - 1 + POINTNUM) % POINTNUM].y > polypoint[j].y)
+				{
+					NET *p = new NET;
+					p->x = polypoint[j].x;
+					p->ymax = polypoint[(j - 1 + POINTNUM) % POINTNUM].y;
+					p->dx = Width * ((polypoint[(j - 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j - 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->next = pNET[i]->next;
+					pNET[i]->next = p;
+				}
+				if (polypoint[(j + 1 + POINTNUM) % POINTNUM].y > polypoint[j].y)
+				{
+					NET *p = new NET;
+					p->x = polypoint[j].x;
+					p->ymax = polypoint[(j + 1 + POINTNUM) % POINTNUM].y;
+					p->dx = Width * ((polypoint[(j + 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j + 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->next = pNET[i]->next;
+					pNET[i]->next = p;
+				}
+			}
+	}
+	/******建立并更新活性边表AET*****************************************************/
+	for (i = 0; i <= MaxY; i += Width)
+	{
+		//计算新的交点x,更新AET
+		NET *p = pAET->next;
+		while (p)
+		{
+			p->x = p->x + p->dx;
+			p = p->next;
+		}
+		//更新后新AET先排序*************************************************************/
+		//断表排序,不再开辟空间
+		AET *tq = pAET;
+		p = pAET->next;
+		tq->next = NULL;
+		while (p)
+		{
+			while (tq->next && p->x >= tq->next->x)
+				tq = tq->next;
+			NET *s = p->next;
+			p->next = tq->next;
+			tq->next = p;
+			p = s;
+			tq = pAET;
+		}
+		//(改进算法)先从AET表中删除ymax==i的结点****************************************/
+		AET *q = pAET;
+		p = q->next;
+		while (p)
+		{
+			if (p->ymax == i)
+			{
+				q->next = p->next;
+				delete p;
+				p = q->next;
+			}
+			else
+			{
+				q = q->next;
+				p = q->next;
+			}
+		}
+		//将NET中的新点加入AET,并用插入法按X值递增排序**********************************/
+		p = pNET[i]->next;
+		q = pAET;
+		while (p)
+		{
+			while (q->next && p->x >= q->next->x)
+				q = q->next;
+			NET *s = p->next;
+			p->next = q->next;
+			q->next = p;
+			p = s;
+			q = pAET;
+		}
+		/******配对填充颜色***************************************************************/
+
+		p = pAET->next;
+		/*
+		if (p&&p->next&&i!= MinY)
+		{
+
+			float h = p->next->x;
+			glVertex2i(static_cast<int>(h), i);
+		}
+		else
+			continue;
+		*/
+		while (p && p->next)
+		{
+		
+			if ((i / 10) % 2 == 1 && i != MinY) //当Y坐标为奇数，X坐标向右移（左边的X增加）
+			{
+				float j = p->x+10;
+				//glVertex2i(static_cast<int>(j), i-5); glVertex2i(static_cast<int>(j), i+5);
+				float h = p->next->x;//这里平移
+				//glVertex2i(static_cast<int>(h), i-5); glVertex2i(static_cast<int>(h), i+5);
+				//glBegin(GL_LINES);
+				glVertex2i(static_cast<int>(j), i - 2);
+				glVertex2i(static_cast<int>(j), i);
+
+				//glEnd();
+			}
+
+			p = p->next;//考虑端点情况
+
+		}
+
+
+
+	}
+	glEnd();
+}
+
+
+
+
+
+void PolyScan4()
+{
+	/******计算最高点和最低点的y坐标(扫描到此结束)****************************************/
+	int MaxY = 0, MinY = 1024;
+	int i;
+	for (i = 0; i < POINTNUM; i++)
+	{
+		if (polypoint[i].y > MaxY)
+			MaxY = polypoint[i].y;
+		if (polypoint[i].y < MinY)
+			MinY = polypoint[i].y;
+	}
+
+	/*******初始化AET表***********************************************************/
+	AET *pAET = new AET;
+	pAET->next = NULL;
+
+	/******初始化NET表************************************************************/
+	NET *pNET[1024];
+	for (i = 0; i <= MaxY; i++)
+	{
+		pNET[i] = new NET;
+		pNET[i]->next = NULL;
+	}
+	//glClear(GL_COLOR_BUFFER_BIT);        //赋值的窗口显示.
+	glColor3f(1.0, 0.0, 0.0);             //设置直线的颜色红色
+	glLineWidth(1);
+	glBegin(GL_LINES);
+	/******扫描并建立NET表*********************************************************/
+	for (i = 0; i <= MaxY; i++)
+	{
+		for (int j = 0; j < POINTNUM; j++)
+			if (polypoint[j].y == i)
+			{
+				//一个点跟前面的一个点形成一条线段，跟后面的点也形成线段
+				if (polypoint[(j - 1 + POINTNUM) % POINTNUM].y > polypoint[j].y)
+				{
+					NET *p = new NET;
+					p->x = polypoint[j].x;
+					p->ymax = polypoint[(j - 1 + POINTNUM) % POINTNUM].y;
+					p->dx = Width * ((polypoint[(j - 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j - 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->next = pNET[i]->next;
+					pNET[i]->next = p;
+				}
+				if (polypoint[(j + 1 + POINTNUM) % POINTNUM].y > polypoint[j].y)
+				{
+					NET *p = new NET;
+					p->x = polypoint[j].x;
+					p->ymax = polypoint[(j + 1 + POINTNUM) % POINTNUM].y;
+					p->dx = Width * ((polypoint[(j + 1 + POINTNUM) % POINTNUM].x - polypoint[j].x) / (polypoint[(j + 1 + POINTNUM) % POINTNUM].y - polypoint[j].y));
+					p->next = pNET[i]->next;
+					pNET[i]->next = p;
+				}
+			}
+	}
+	/******建立并更新活性边表AET*****************************************************/
+	for (i = 0; i <= MaxY; i += Width)
+	{
+		//计算新的交点x,更新AET
+		NET *p = pAET->next;
+		while (p)
+		{
+			p->x = p->x + p->dx;
+			p = p->next;
+		}
+		//更新后新AET先排序*************************************************************/
+		//断表排序,不再开辟空间
+		AET *tq = pAET;
+		p = pAET->next;
+		tq->next = NULL;
+		while (p)
+		{
+			while (tq->next && p->x >= tq->next->x)
+				tq = tq->next;
+			NET *s = p->next;
+			p->next = tq->next;
+			tq->next = p;
+			p = s;
+			tq = pAET;
+		}
+		//(改进算法)先从AET表中删除ymax==i的结点****************************************/
+		AET *q = pAET;
+		p = q->next;
+		while (p)
+		{
+			if (p->ymax == i)
+			{
+				q->next = p->next;
+				delete p;
+				p = q->next;
+			}
+			else
+			{
+				q = q->next;
+				p = q->next;
+			}
+		}
+		//将NET中的新点加入AET,并用插入法按X值递增排序**********************************/
+		p = pNET[i]->next;
+		q = pAET;
+		while (p)
+		{
+			while (q->next && p->x >= q->next->x)
+				q = q->next;
+			NET *s = p->next;
+			p->next = q->next;
+			q->next = p;
+			p = s;
+			q = pAET;
+		}
+		/******配对填充颜色***************************************************************/
+
+		p = pAET->next;
+		/*
+		if (p&&p->next&&i!= MinY)
+		{
+
+			float h = p->next->x;
+			glVertex2i(static_cast<int>(h), i);
+		}
+		else
+			continue;
+		*/
+		while (p && p->next)
+		{
+
+			if ((i / 10) % 2 == 0 && i != MinY) //当Y坐标为奇数，X坐标向右移（左边的X增加）
+			{
+				float j = p->x + 10;
+				//glVertex2i(static_cast<int>(j), i-5); glVertex2i(static_cast<int>(j), i+5);
+				float h = p->next->x-10;//这里平移
+				//glVertex2i(static_cast<int>(h), i-5); glVertex2i(static_cast<int>(h), i+5);
+				//glBegin(GL_LINES);
+				glVertex2i(static_cast<int>(h), i - 2);
+				glVertex2i(static_cast<int>(h), i);
+
+				//glEnd();
+			}
+
+			p = p->next;//考虑端点情况
+
+		}
+
+
+
+	}
+	glEnd();
+}
 void init(int argc, char** argv)
 {
 	glutInit(&argc, argv);  //I初始化 GLUT.
@@ -437,8 +818,10 @@ void myDisplay(void)
 	//glLineWidth(5.0f);
 	//glBegin(GL_LINE_STRIP);
 	PolyScan();
-	PolyScan1();
-	PolyScan2();
+	PolyScan1();//左边
+	PolyScan2();//右边
+	PolyScan3();
+	PolyScan4();
 	//glEnd();
 
 	//glColor3f(0.0, 0.4, 0.2);
