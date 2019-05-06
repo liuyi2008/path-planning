@@ -1,9 +1,21 @@
 #include<windows.h>
 #include<GL/glut.h>
 #include<iostream>
+#include <conio.h>
+#include<vector>
+using std::vector;
 using namespace std;
-const int POINTNUM = 7;      //多边形点数.
+//const int POINTNUM = 7;  //多边形点数.
+int POINTNUM;
 const int Width = 10;
+GLfloat x = 0.0;
+GLfloat y = 0.0;
+
+GLsizei wh = 800, ww = 800;
+
+int n;
+vector<int>a(n);
+vector<int>b(n);
 
 /******定义结构体用于活性边表AET和新边表NET***********************************/
 typedef struct XET
@@ -18,11 +30,11 @@ struct point
 {
 	float x;
 	float y;
-} polypoint[POINTNUM] = { {250,50},{500,150},{550,400},{250,450},{100,350},{100,100},{120,30} };//多边形顶点
+} //polypoint[POINTNUM] = { {250,50},{500,150},{550,400},{250,450},{100,350},{100,100},{120,30} };//多边形顶点
 
 
 
-void PolyScan()
+void PolyScan( point *polypoint[])
 {
 	/******计算最高点的y坐标(扫描到此结束)****************************************/
 	int MaxY = 0, MinY = 1024;
@@ -41,7 +53,7 @@ void PolyScan()
 
 	/******初始化NET表************************************************************/
 	NET *pNET[1024];
-	for (i = 0; i <= MaxY; i++)
+	for (i = MinY; i <= MaxY; i++)
 	{
 		pNET[i] = new NET;  //pNET是头节点
 		pNET[i]->next = NULL;
@@ -51,7 +63,8 @@ void PolyScan()
 	//glLineWidth(1);
 	//glBegin(GL_LINE_LOOP);
 	/******扫描并建立NET表（第一次出现的边）*********************************************************/
-	for (i = 0; i <= MaxY; i++)               //每条扫描线都要遍历一遍多边形所有的点
+
+	for (i = MinY; i <= MaxY; i++)               //每条扫描线都要遍历一遍多边形所有的点
 	{
 		for (int j = 0; j < POINTNUM; j++)
 			if (polypoint[j].y == i)
@@ -78,7 +91,7 @@ void PolyScan()
 			}
 	}
 	/******建立并更新活性边表AET*****************************************************/
-	for (i = 0; i <= MaxY; i+= Width)
+	for (i = MinY; i <= MaxY; i+= Width)
 	{
 		//计算新的交点x,更新AET
 		NET *p = pAET->next; // NET *p = new NET;  p = pAET->next; 
@@ -142,7 +155,7 @@ void PolyScan()
 			{
 				float j = p->x; //printf("j = %f", j);
 				//glVertex2i(static_cast<int>(j), i-5); glVertex2i(static_cast<int>(j), i+5);
-				float h = p->next->x; //printf("h = %f", h);
+				//float h = p->next->x; //printf("h = %f", h);
 				//glVertex2i(static_cast<int>(h), i-5); glVertex2i(static_cast<int>(h), i+5);
 				glPointSize(3);
 				glBegin(GL_POINTS);
@@ -183,7 +196,8 @@ void PolyScan()
 
 }
 
-void PolyScan1()
+
+void PolyScan1(point *polypoint[])
 {
 	/******计算最高点和最低点的y坐标(扫描到此结束)****************************************/
 	int MaxY = 0, MinY = 1024;
@@ -327,7 +341,8 @@ void PolyScan1()
 	glEnd();
 }
 
-void PolyScan2()
+
+void PolyScan2(point *polypoint[])
 {
 	/******计算最高点和最低点的y坐标(扫描到此结束)****************************************/
 	int MaxY = 0, MinY = 1024;
@@ -483,7 +498,7 @@ void PolyScan2()
 }
 
 
-void PolyScan3()
+void PolyScan3(point *polypoint[])
 {
 	/******计算最高点和最低点的y坐标(扫描到此结束)****************************************/
 	int MaxY = 0, MinY = 1024;
@@ -633,10 +648,7 @@ void PolyScan3()
 }
 
 
-
-
-
-void PolyScan4()
+void PolyScan4(point *polypoint[])
 {
 	/******计算最高点和最低点的y坐标(扫描到此结束)****************************************/
 	int MaxY = 0, MinY = 1024;
@@ -784,11 +796,81 @@ void PolyScan4()
 	}
 	glEnd();
 }
+
+
+
+
+void myDisplay1(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	
+
+	y = wh - y;
+
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < a.size(); i++)
+	{
+		glVertex3f(a[i], wh - b[i], 0);
+	}
+	glEnd();
+	glFlush();
+}
+
+
+void myDisplay2(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	PolyScan(polypoint[i]);
+	glFlush();
+}
+
+
+void mymouse(GLint button, GLint state, GLint wx, GLint wy)
+
+{
+
+
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+
+		exit(0);
+
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+
+	{
+		x = wx;
+		y = wy;
+		a.push_back(x);
+		b.push_back(y);
+	}
+
+}
+
+
+void myreshape(GLint w, GLint h) 
+{
+
+	glViewport(0, 0, w, h);
+
+	glMatrixMode(GL_PROJECTION);
+
+	glLoadIdentity();          //初始化
+
+	glOrtho(0, w, 0, h, -1.0, 1.0);
+
+	glMatrixMode(GL_MODELVIEW);
+
+	ww = w;
+
+	wh = h;
+
+}
+
+
 void init(int argc, char** argv)
 {
 	glutInit(&argc, argv);  //I初始化 GLUT.
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);  //设置显示模式：单个缓存和使用RGB模型
-	glutInitWindowPosition(50, 100);  //设置窗口的顶部和左边位置
+	glutInitWindowPosition(50, 100);  //设置窗口的位置，窗口左上角相对于桌面坐标(x,y)
 	glutInitWindowSize(800, 600);  //设置窗口的高度和宽度
 	glutCreateWindow("Scan Program");
 
@@ -797,45 +879,42 @@ void init(int argc, char** argv)
 	gluOrtho2D(0, 600, 0, 450);
 }
 
-void myDisplay(void)
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-	//glColor3f(0.8, 0.0, 0.0);
 
-	glBegin(GL_POLYGON);
-	glColor3f(0.0, 1.0, 0.0);
-	glVertex3i(250, 50, 0);
-	glVertex3i(500, 150, 0);
-	glVertex3i(550, 400, 0);
-	glVertex3i(250, 450, 0);
-	glVertex3i(100, 350, 0);
-	glVertex3i(100, 100, 0);
-	glVertex3i(120, 30, 0);
-	glEnd();
-
-	//glColor3f(1.0f, 1.0f, 1.0f);
-	//glPointSize(2);
-	//glLineWidth(5.0f);
-	//glBegin(GL_LINE_STRIP);
-	PolyScan();
-	PolyScan1();//左边
-	PolyScan2();//右边
-	PolyScan3();
-	PolyScan4();
-	//glEnd();
-
-	//glColor3f(0.0, 0.4, 0.2);
-	//glBegin(GL_LINES);
-	//PolyScan1();
-	//glEnd();
-
-	glFlush();
-}
 
 int main(int argc, char** argv)
 {
+	
+
+	
+
 	init(argc, argv);
-	glutDisplayFunc(myDisplay);        //图形的定义传递给window.
+	glutDisplayFunc(myDisplay1);  //图形的定义传递给window.
+	glutMouseFunc(mymouse);
+	glutReshapeFunc(myreshape);
+
+	int ch;
+	while (1)
+	{
+		if (_kbhit())
+		{//如果有按键按下，则_kbhit()函数返回真
+			ch = _getch();//使用_getch()函数获取按下的键值
+			cout << ch;
+			if (ch == 13) { break; }//当按下回车时结束循环，ESC键的键值时13.
+		}
+	}
+	POINTNUM = a.size();
+	point polypoint[10];   //这里有没有改进余地？
+	int i;
+	for (i = 0; i <= POINTNUM; i++) 
+	{
+		polypoint[i] = { a[i],b[i] };
+    }
+
+	
+	glutDisplayFunc(myDisplay2);
+
+	
+
 	glutMainLoop();
 	
 	return 0;
