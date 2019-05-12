@@ -1,0 +1,18 @@
+﻿  tianchong2.cpp
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(153): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(164): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(166): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(175): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(177): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(314): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(321): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(323): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(469): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(476): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(478): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(626): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(628): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(776): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(778): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
+c:\users\ly\source\repos\project1\project1\tianchong2.cpp(837): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+  Project1.vcxproj -> C:\Users\ly\source\repos\Project1\x64\Debug\Project1.exe
