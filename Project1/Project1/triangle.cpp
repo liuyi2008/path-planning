@@ -1,23 +1,17 @@
 #include <gl/glut.h>
-#include <vector>
 #include<math.h>
-using std::vector;
 
-float y = 1.0f;//基准坐标
+
+float y = 0.5f;//基准坐标
 
 float y2;//基准坐标
 
 float dy = 0.001f;//变换量
 
-float a = 3.0f;//阈值
+float a = 1.5f;//阈值
 
-struct point
-{
-	int x;
-	int y;
-};
+int process = 1;//控制过程，1：状态1变化到2，2：状态2变回到1
 
-vector<point>Tpoint;
 
 void Init()
 
@@ -26,29 +20,29 @@ void Init()
 
 	glMatrixMode(GL_PROJECTION);
 
-	gluOrtho2D(-5.0, 5.0, -5.0, 5.0); //设置显示的范围是X:-5.0~5.0, Y:-5.0~5.0
+	gluOrtho2D(-3.0, 15.0, -15.0, 3.0); //  窗口（画纸），设置显示的范围是X:-5.0~5.0, Y:-5.0~5.0  比例和视区一样
 
 	glMatrixMode(GL_MODELVIEW);
 
 }
 
-void Reshape(int w, int h)
+//void Reshape(int w, int h)
+//
+//{
+//
+//	glViewport(0, 0, (GLsizei)w, (GLsizei)h); //设置视区尺寸
+//
+//	glMatrixMode(GL_PROJECTION); //指定当前操作投影矩阵堆栈
+//
+//	glLoadIdentity(); //重置投影矩阵
+//
+//	//指定透视投影的观察空间
+//
+//	gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);
+//
+//}
 
-{
-
-	glViewport(0, 0, (GLsizei)w, (GLsizei)h); //设置视区尺寸
-
-	glMatrixMode(GL_PROJECTION); //指定当前操作投影矩阵堆栈
-
-	glLoadIdentity(); //重置投影矩阵
-
-	//指定透视投影的观察空间
-
-	gluOrtho2D(0.0, (GLdouble)w, 0.0, (GLdouble)h);
-
-}
-
-void drawTriangle_line(float y) //绘制中心在原点，边长为2的正方形
+void drawTriangle_line(float y) 
 
 {
 	glColor3f(1.0f, 0.0f, 0.0f);
@@ -107,15 +101,45 @@ void Display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT);//清除颜色和深度缓冲区
 
-	//gluLookAt(0.0 ,0.0 ,0.0 ,5.0 ,-5.0 ,0.0 ,0.0 ,1.0 ,0.0 );
+	for (int i = 0; i < 5; i++) // 画i行,j列
+	{
+		glLoadIdentity(); //重置模型视图矩阵
+
+		glTranslatef( i%2 * 0.5 * sqrt(3) * a, i*-1.5 * a, 0.0);  //下一行 ，j%2 是一行右移下一行不动
+
+		drawTriangle_line(y);
+
+		for (int j = 1; j < 5; j++) //一行画5个（列）
+		{
+			glTranslatef(sqrt(3) * a, 0.0, 0.0);
+
+			drawTriangle_line(y);
+
+		}
+
+	}
+/*
 
 	glLoadIdentity(); //重置模型视图矩阵
- 
+
+	
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glPointSize(10);
+	glBegin(GL_POINTS); //定点线
+	glVertex2f(-5.0, -5.0); 
+	glVertex2f(5.0, 5.0); //-10.0, 10.0, -10.0, 10.0
+	glEnd();
+
+	glBegin(GL_LINES); //定点线
+	glVertex2f(-5.0, -5.0); glVertex2f(5.0, 5.0); //-10.0, 10.0, -10.0, 10.0
+	glEnd();
+	
+
 	drawTriangle_line(y);
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 1; i < 5; i++)
 	{
-		glTranslatef(i * sqrt(3) * a, 0.0, 0.0);
+		glTranslatef(sqrt(3) * a, 0.0, 0.0);
 
 		drawTriangle_line(y);
 
@@ -123,17 +147,30 @@ void Display(void)
 
 	glLoadIdentity(); //恢复初始坐标系
 
-	glTranslatef(0.5 * sqrt(3) * a, -0.5 * a - a, 0.0);  //下一行
+	glTranslatef(0.5 * sqrt(3) * a, -1.5 * a, 0.0);  //下一行
 
 	drawTriangle_line(y);
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 1; i < 5; i++)
 	{
-		glTranslatef(i * sqrt(3) * a, 0.0, 0.0);
+		glTranslatef(sqrt(3) * a, 0.0, 0.0);
 
 		drawTriangle_line(y);
-
 	}
+
+	glLoadIdentity();
+
+	glTranslatef(0, -3*a, 0.0); //下两行
+
+	drawTriangle_line(y);
+
+	for (int i = 1; i < 5; i++)
+	{
+		glTranslatef(sqrt(3) * a, 0.0, 0.0);
+
+		drawTriangle_line(y);
+	}
+*/
 
 	glFlush();
 
@@ -146,9 +183,70 @@ void Display(void)
 void Display2(void) 
 {
 
-	glTranslatef(0.5*sqrt(3) * a, -1.5f, 0.0);
+	glTranslatef(0.5*sqrt(3) * a, -0.5 * a, 0.0);//此为原始位置
+
+	for (int i = 0; i < 5; i++)  //i行j列
+	{
+		glPushMatrix();
+
+		glTranslatef(i%2*-0.5 * sqrt(3) * a, i*-1.5 * a, 0.0);
+
+		drawTriangle_line2(y2);
+		
+		for (int j = 1; j < 5; j++)
+		{
+			glTranslatef(sqrt(3) * a, 0.0, 0.0);
+
+			drawTriangle_line2(y2);
+
+		}
+
+		glPopMatrix();
+
+	}
+
+/*
+	drawTriangle_line2(y2);
+
+	glPushMatrix(); //记录此为原始状态
+
+	glPushMatrix();
+
+	for (int i = 1; i < 5; i++)
+	{
+		glTranslatef(sqrt(3) * a, 0.0, 0.0);
+
+		drawTriangle_line2(y2);
+
+	}
+
+	glPopMatrix(); //回到初始位置
+	
+	glTranslatef(-0.5 * sqrt(3) * a, -1.5 * a, 0.0);  //下一行
 
 	drawTriangle_line2(y2);
+
+	for (int i = 1; i < 5; i++)
+	{
+		glTranslatef(sqrt(3) * a, 0.0, 0.0);
+
+		drawTriangle_line2(y2);
+	}
+
+	glPopMatrix(); //回到初始位置
+
+	glTranslatef(0, -3 * a, 0.0);  //下两行
+
+	drawTriangle_line2(y2);
+
+	for (int i = 1; i < 5; i++)
+	{
+		glTranslatef(sqrt(3) * a, 0.0, 0.0);
+
+		drawTriangle_line2(y2);
+	}
+
+*/
 
 	glFlush();
 
@@ -159,7 +257,13 @@ void Display2(void)
 void myIdle(void) //在空闲时调用，达到动画效果
 
 {
-	y += dy;
+	switch (process)
+	{
+	case 1:y += dy;
+		break;
+	case 2:y -= dy;
+		break;
+	}
 
 	if (y <= a)
 	{
@@ -174,9 +278,14 @@ void myIdle(void) //在空闲时调用，达到动画效果
 		glClear(GL_COLOR_BUFFER_BIT);//清除颜色和深度缓冲区
 
 	}
-	else if (y2 == 0)
 
-		y = 1.0f;
+	if (y > 2 * a)
+
+		process = 2;
+
+	else if (y < 0)
+
+		process = 1;
 
 }
 
@@ -186,13 +295,11 @@ int main(int argc, char *argv[])
 
 	glutInit(&argc, argv);
 
-	//窗口使用RGB颜色，双缓存和深度缓存
-
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 
-	glutInitWindowPosition(100, 100);
+	glutInitWindowPosition(50, 50);
 
-	glutInitWindowSize(1000, 600);
+	glutInitWindowSize(800, 800);//视区大小像素
 
 	glutCreateWindow("动画");
 
