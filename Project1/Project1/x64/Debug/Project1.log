@@ -1,18 +1,16 @@
-﻿  tianchong2.cpp
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(153): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(164): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(166): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(175): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(177): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(314): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(321): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(323): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(469): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(476): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(478): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(626): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(628): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(776): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(778): warning C4244: “初始化”: 从“int”转换到“float”，可能丢失数据
-c:\users\ly\source\repos\project1\project1\tianchong2.cpp(837): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
-  Project1.vcxproj -> C:\Users\ly\source\repos\Project1\x64\Debug\Project1.exe
+﻿  triangle.cpp
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(54): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(56): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(64): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(66): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(81): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(83): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(91): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(93): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(108): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(114): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(186): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(192): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(198): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
+  LINK : 没有找到 C:\Users\ly\source\repos\path-planning\Project1\x64\Debug\Project1.exe 或上一个增量链接没有生成它；正在执行完全链接
+  Project1.vcxproj -> C:\Users\ly\source\repos\path-planning\Project1\x64\Debug\Project1.exe

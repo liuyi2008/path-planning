@@ -18,7 +18,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tianchong2.cpp">
+    <ClCompile Include="triangle.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
