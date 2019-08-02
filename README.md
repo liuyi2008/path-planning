@@ -13,3 +13,6 @@ hexagon.cpp
 
 triangle to gcode.cpp
 生成Gcode文件，但是不成熟，仅作参考，gcode只适合makerbot replicator 2
+
+get coord and inter.cpp
+取交
