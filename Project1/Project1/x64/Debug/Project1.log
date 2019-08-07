@@ -1,16 +1,6 @@
-﻿  triangle.cpp
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(54): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(56): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(64): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(66): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(81): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(83): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(91): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(93): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(108): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(114): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(186): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(192): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-c:\users\ly\source\repos\path-planning\project1\project1\triangle.cpp(198): warning C4244: “参数”: 从“double”转换到“GLfloat”，可能丢失数据
-  LINK : 没有找到 C:\Users\ly\source\repos\path-planning\Project1\x64\Debug\Project1.exe 或上一个增量链接没有生成它；正在执行完全链接
+﻿  get coord and inter.cpp
+c:\users\ly\source\repos\path-planning\project1\project1\get coord and inter.cpp(98): warning C4244: “=”: 从“float”转换到“int”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\get coord and inter.cpp(234): warning C4244: “参数”: 从“float”转换到“GLint”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\get coord and inter.cpp(240): warning C4244: “参数”: 从“float”转换到“GLint”，可能丢失数据
+c:\users\ly\source\repos\path-planning\project1\project1\get coord and inter.cpp(246): warning C4244: “参数”: 从“float”转换到“GLint”，可能丢失数据
   Project1.vcxproj -> C:\Users\ly\source\repos\path-planning\Project1\x64\Debug\Project1.exe
